@@ -1,6 +1,9 @@
 # fullCalendar
 ใช้งาน fullCalendar&amp;dataTable
 
+Sheet + Code
+https://docs.google.com/spreadsheets/d/1cCnnFmWld9WCJDQEgHnJ6llbyAncrqKSvCR3sHEBVtc/copy
+
 Zoom 13/5/2023
 Learn
 #partData
