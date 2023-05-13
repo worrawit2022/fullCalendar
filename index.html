@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <!-- cdn Fullcalendar -->
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.6/index.global.min.js'></script>
+    <!-- the moment-to-fullcalendar connector. must go AFTER the moment lib -->
+    <script src='https://cdn.jsdelivr.net/npm/moment@2.27.0/min/moment.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/moment@6.1.6/index.global.min.js'></script>
+    <!-- Datatable css -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css"/>
+    <!-- responsive DataTable CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.4.1/css/responsive.dataTables.min.css"/>
+    <!-- font awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- animate Style -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+    <link href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css' rel='stylesheet'>
+
+<script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
+
+    <?!= include('style') ?>    
+
+  </head>
+<body>
+  <div class="container">
+    <div id="loading" class="d-flex justify-content-center  align-items-center invisible">
+        <span id="showload" style="font-size:14px" >Please wait Loading Data...</span>
+        <img src="https://res.cloudinary.com/gukkghu/image/upload/v1683651328/calendar_lmrn21.gif" alt="gukkghu" width="150" > 
+        <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+
+<nav class="navbar navbar-light" style="background-color: #00FFCA;">
+  <div class="container">
+    <a class="navbar-brand" href="#">
+      <img src="https://res.cloudinary.com/gukkghu/image/upload/v1683651328/calendar_lmrn21.gif" alt="gukkghu" width="60" >
+    </a>
+        <div class="fs-5 text-center" style="color:#088395">ปฏิทินกิจกรรมวิชาการ</div>
+
+            <div class="action-buttons">
+                <a onclick="printlist()" class="btn btn-light mx-1px text-info text-95" href="#" data-title="Print">
+                    <i class="mr-1 fa fa-print text-primary-m1 text-120 w-2"></i>
+                    Print
+                </a>
+                <button type="button" class="btn btn-light text-info" onclick="mainModal('b')"><i class="fa-solid fa-bell"></i> เพิ่มกิจกรรมวิชาการ</button>
+            </div>    
+  </div>
+</nav>
+<div class="showNews" style="display: flex; ">
+<marquee id="marq"><?= marq ?></marquee>
+</div>
+    <div class="container">
+      <div class="row mt-1 justify-content-center d-flex">
+        <div class="spanSta" >
+          <div class="card rounded">
+            <div class="card-body">
+                  <span class="showSta" id="spa"></span>
+            </div>
+          </div>  
+          <div class="card ms-4 rounded" >
+            <div class="card-body">
+                  <span class="showSta" id="spb"></span>
+            </div>
+          </div>     
+          <div class="card ms-4 rounded">
+            <div class="card-body">
+                  <span class="showSta" id="spc"></span>       
+            </div>
+          </div>     
+        </div>
+
+        <div id="section1" class="col-md-7 align-items-stretch mt-4 ">
+          <div id='calendar'></div>
+        </div>
+        <div id="section2" class="col-md-5 d-flex align-items-stretch mt-4">
+          <div class="card" style="width: 100%;">
+            <div class="card-body">
+              <table id="example" class="display responsive nowrap" style="width:100%"></table>
+            </div>
+            <h6 class="text-center text-danger" id="msgAlert"></h6>
+        </div>        
+      </div>
+    </div>
+
+
+    <!-- Button trigger modal -->
+<button type="button" id="openModalBTN" class="d-none btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+  Launch static backdrop modal
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="staticBackdropLabel">เพิ่มกิจกรรมวิชาการ</h1>
+        <button type="button" id="clmodal" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form onsubmit="addData(this)" class="needs-validation" novalidate>
+          <div class="row mb-3">
+            <label for="sdate" class="col-sm-5 col-form-label">วันเริ่มกิจกรรม</label>
+            <div class="col-sm-7">
+              <input type="date" class="form-control" id="sdate" name="sdate" placeholder="วันเริ่มกิจกรรม" required>
+            </div>
+          </div>       
+          <div class="row mb-3">
+            <label for="stime" class="col-sm-5 col-form-label">เวลาเริ่มกิจกรรม</label>
+            <div class="col-sm-7">
+              <input type="time" class="form-control" id="stime" name="stime" placeholder="เวลาเริ่มกิจกรรม" >
+            </div>
+          </div>                  
+          <div class="row mb-3">
+            <label for="edate" class="col-sm-5 col-form-label">วันสิ้นสุดกิจกรรม</label>
+            <div class="col-sm-7">
+              <input type="date" class="form-control" id="edate" name="edate" placeholder="วันสิ้นสุดกิจกรรม" required>
+            </div>
+          </div>      
+          <div class="row mb-3">
+            <label for="etime" class="col-sm-5 col-form-label">เวลาสิ้นสุดกิจกรรม</label>
+            <div class="col-sm-7">
+              <input type="time" class="form-control" id="etime" name="etime" placeholder="เวลาสิ้นสุดกิจกรรม" >
+            </div>
+          </div>                
+          <div class="row mb-3">
+            <label for="titleE" class="col-sm-5 col-form-label">Activities</label>
+            <div class="col-sm-7">
+              <input type="text" class="form-control" id="titleE" name="titleE" placeholder="ชื่อกิจกรรม" required>
+            </div>
+          </div>     
+          <div class="row mb-3">
+            <label for="titleE" class="col-sm-5 col-form-label">Type</label>
+            <div class="col-sm-7">
+              <select id="inputState" class="form-select" name="inputState" required>
+                <option selected disabled value="">เลือกประเภทกิจกรรม...</option>
+                <option value="พัฒนาผู้เรียน" data-color="#00FFCA" style="background-color: #00FFCA;" class="text-light">กิจกรรมพัฒนาผู้เรียน</option>
+                <option value="พัฒนาครู" data-color="#C9A7EB" style="background-color: #C9A7EB;" class="text-light">กิจกรรมพัฒนาครู</option>
+                <option value="พัฒนาสถานศึกษา" data-color="#E8A0BF" style="background-color: #E8A0BF;" class="text-light">กิจกรรมพัฒนาสถานศึกษา</option>
+              </select>
+            </div>
+          </div>      
+          <div class="row mb-3">
+            <label for="allday" class="col-sm-5 col-form-label">AllDay</label>
+            <div class="col-sm-7">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="alldayChk" value="true" id="alldayChk" >
+            </div> 
+            </div>            
+          </div>
+      </div> <!-- จบ Modal body -->
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary">Add Event</button>
+      </div>
+    </form>
+    </div>
+  </div>
+</div>
+</div>
+
+
+  <div class="container-fluid text-end">
+    <a class="tagGukkghu bg-dark text-light " style="font-size:8px; text-decoration: none; " href="#">By Waroonporn 2023.05 Thailand</a>
+  </div>
+
+    <?!= include('script') ?>    
+
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+
+    <!--  DataTable Script -->
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    
+    <!-- responsive DataTable Script -->
+    <script src="https://cdn.datatables.net/responsive/2.4.1/js/dataTables.responsive.min.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+
+  </body>
+</html>
