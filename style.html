@@ -1,0 +1,236 @@
+    <style>
+
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300&display=swap');
+body{
+  font-family: 'Kanit', sans-serif;
+}
+card{
+  height: 100%;
+}
+
+input.form-control{
+  font-size: 0.9rem;
+  color: blueviolet
+}
+
+//เริ่ม set css dataTables
+.dataTables_paginate
+{
+    text-align:right !important;
+    font-size: 10px;
+    margin-top: 3px !important;
+}
+
+
+/* smaller size filter text box */
+.dataTables_filter>label>input
+{
+    line-height:normal !important;
+    font-size: 12px; 
+}
+
+/*entry length text size changed*/
+.dataTables_length > label
+{
+    font-weight:normal !important;
+    font-size:10px !important; 
+}
+/*filter label text size changed*/
+.dataTables_filter > label
+{
+    font-weight:normal !important;
+    font-size:10px !important; 
+}
+.dataTables_info{
+  font-size: 10px !important;
+  color: green !important;
+}
+
+.titleEv {
+  font-size:12px;
+}
+
+.dateStart{
+  font-size: 12px;
+}
+
+
+//เริ่ม set css FullCalendar
+//วันนี้
+.fc-day-today {
+    background: #F3E8FF !important;
+    border: none !important;
+  
+} 
+
+//เลขแสดงวัน
+a.fc-daygrid-day-number{
+  text-decoration: none;
+  color: black;
+  font-size: 0.5rem; 
+
+}
+
+/* เดือน ส่วนของ Title */
+h2.fc-toolbar-title{
+  font-size: 14px;
+  color: lightgreen;
+}
+
+/* จัดกลางกล่องของ Title Event */
+.fc-event-title-container{
+      text-align: center;
+}
+
+/*  ตัวหนังสือ Event */
+.fc-event-title , .fc-sticky{
+      font-size: 0.8rem;
+      color: black;
+}
+
+/* ขนาดอักษรปุ่ม Calendar */
+.fc .fc-button {
+      font-size: 0.7rem;
+}
+
+/* สีอักษร เสาร์อาทิตย์ */
+.fc-day-sat a.fc-col-header-cell-cushion
+{
+  color: #a716a7;
+}
+
+.fc-day-sun a.fc-col-header-cell-cushion
+{
+  color: red;
+}
+
+a.fc-col-header-cell-cushion{
+  text-decoration: none;
+}
+
+table.fc-col-header thead{
+  background-color: #F1F6F9;
+}
+
+/* เริ่มตั้งค่าการ print */
+@media only screen and (max-width: 600px) {
+  /*  ตัวหนังสือ Event */
+  a.fc-daygrid-more-link, fc-more-link{
+        font-size: 0.4rem;
+  }
+}
+
+@media print
+{
+
+    #calendar button{
+      display: none
+    }
+    .action-buttons{
+        display: none;
+    }
+    #section2 .card table{
+      display: none;
+    }
+    .dataTables_paginate
+    {
+          display: none;
+
+    }
+    /* smaller size filter text box */
+    .dataTables_filter>label>input
+    {
+          display: none;
+    }
+    .dataTables_length > label
+    {
+          display: none;
+
+    }
+    .dataTables_filter > label
+    {
+          display: none;
+    }
+    .dataTables_info{
+          display: none;
+
+    }
+    .example_length{
+          display: none;
+    }
+    .card{
+      display:none;
+    }
+
+
+}
+
+  marquee{
+  font-size: 18px;
+  font-weight: 800;
+  color: #FFEBEB;
+  display: inline;
+  }
+
+  .showNews{
+    background-color: #212A3E;
+  }
+
+  #loading{
+    position :fixed;
+    top:0;
+    left:0;
+    z-index:1000;
+    background-color : #ffff;
+    height:100vh;
+    width:100vw;
+  }
+  
+  #showload{
+    font-size: 20px;
+    font-weight: bold;
+  }
+
+  .spanSta{
+    display: flex;
+    justify-content: center;
+  }
+  span.showSta{
+    display: inline;
+    margin-right: 10px;
+    width: 80px;
+    font-size: 24px;
+    color: #5C469C;
+    font-weight: bold;
+    
+  }
+  .fa-school{
+    color: #E8A0BF;
+    font-size: 40px;
+    padding-right: 15px;
+
+  }
+
+  .fa-graduation-cap{
+    color: #00FFCA;
+    font-size: 40px;
+    padding-right: 15px;
+
+  }
+
+  .fa-person-chalkboard{
+    color: #C9A7EB;
+    font-size: 40px;
+    padding-right: 15px;
+
+  }
+
+  .spanSta .card{
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  } 
+
+
+
+
+
+    </style>
