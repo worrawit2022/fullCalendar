@@ -1,0 +1,551 @@
+<script>
+
+var calendar
+let newData = []
+
+document.addEventListener('DOMContentLoaded', function() {
+
+      start()
+
+})    
+
+function changePA(){
+    document.getElementById("section1").classList.add("d-none");
+    document.getElementById("section2").classList.remove("d-none");
+}
+
+function changePB(){
+    document.getElementById("section2").classList.add("d-none");
+    document.getElementById("section1").classList.remove("d-none");
+}
+
+function showStatistic(){
+
+    google.script.run.withSuccessHandler(async (resStatistic)=>{
+      const aSt = resStatistic.numbersta
+      const bSt = resStatistic.numberstb
+      const cSt = resStatistic.numberstc
+
+      document.getElementById("spa").innerHTML = `<i class="fa-solid fa-school"></i>  ${aSt} `;
+      document.getElementById("spb").innerHTML = `<i class="fa-solid fa-person-chalkboard"></i>  ${bSt} `;
+      document.getElementById("spc").innerHTML = `<i class="fa-solid fa-graduation-cap"></i>  ${cSt} `;
+    
+    loadingEnd()
+    }).getStatistic()
+}
+
+function start(){
+ loadingStart()
+ document.getElementById("showload").innerHTML = "Please wait Starting GetData..."
+ document.getElementById("showload").classList.add('text-info')
+
+    google.script.run.withSuccessHandler((resEvents)=>{
+      let dataRes = JSON.parse(resEvents) 
+          console.log(dataRes)
+          createCalendar(dataRes)
+          mainCreateTable(dataRes)
+          showStatistic()
+
+      // let yx = dataRes.filter((r)=>{return new Date(r["start"]).toLocaleDateString("th-TH") === new Date().toLocaleDateString("th-TH") })
+      // console.log(yx)
+    }).preSetEventObj2()
+
+}
+
+function mainCreateTable(dataOBJ){
+  var array = []
+    for (let x in dataOBJ) {
+      let obj = dataOBJ[x]
+      let val = Object.keys(obj).map(function(key) {
+        return obj[key];
+      });
+      array.push(val)
+    }
+    // console.log("xxx",array)  
+    showTable(array)
+}
+
+
+
+function createCalendar(resEvents){
+
+ document.getElementById("showload").innerHTML = "Please wait Starting CreateCalendar..."
+
+  var calendarEl = document.getElementById('calendar');
+      calendar = new FullCalendar.Calendar(calendarEl, {
+        headerToolbar: {
+          left: 'prev,next today',
+          center: 'title',
+          right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+        },
+        navLinks: true, // can click day/week names to navigate views
+        // editable: true,
+        selectable: true,
+        dayMaxEvents: true, // allow "more" link when too many events
+        locale: "th",
+        displayEventTime : false,
+        weekNumbers: true,
+        firstDay: 1, 
+        // initialView: 'timeGridDay',
+
+        dateClick: function(info) {
+          // mainModal("a")
+          openModalFormAddEvents()
+          $("#sdate").val(info.dateStr)
+          $("#edate").val(info.dateStr)
+
+        },
+
+        events: resEvents,
+
+        eventTimeFormat: { // like '14:30:00'
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          meridiem: false
+        },                    
+
+      eventClick: function(info) {
+      info.jsEvent.preventDefault(); // don't let the browser navigate
+
+        if (info.event.url) {
+          window.open(info.event.url);
+        }else{
+
+          Swal.fire({
+            title: 'Event: ' + info.event.title + " " +info.event.start.toLocaleDateString("th-TH") + " "+info.event.start.toLocaleTimeString("th-TH")+" "+info.event.allDay,
+            showClass: {
+              popup: 'animate__animated animate__fadeInDown'
+            },
+            hideClass: {
+              popup: 'animate__animated animate__fadeOutUp'
+            }
+          })
+        }
+          info.el.style.borderColor = 'red';
+        }
+      });
+
+  calendar.render();
+}
+
+async function mainModal(modalChk){
+ const { value: password } = await Swal.fire({
+  title: 'Enter your password',
+  input: 'password',
+  inputLabel: 'Password',
+  inputPlaceholder: 'Enter your password',
+  inputAttributes: {
+    maxlength: 10,
+    autocapitalize: 'off',
+    autocorrect: 'off'
+  }
+})
+
+if (password) {
+   document.getElementById("showload").innerHTML = "Please wait Checking your Password..."
+  loadingStart()
+
+  google.script.run.withSuccessHandler((chkRes)=>{
+
+    console.log(chkRes)
+    if(chkRes === true){
+      modalChk = modalChk === "a" ? openModalFormAddEvents() : openModalFormAddEventsManual()
+
+    }else{
+  loadingEnd()
+
+      Swal.fire({
+        icon: 'error',
+        title: 'รหัสผิด...',
+        text: 'Something went wrong!',
+        footer: '<a href="https://mail.google.com/mail/u/0/?hl=en#inbox?compose=new">ติดต่อ Admin </a>'
+      })      
+
+    }
+  }).checkPasswordOnDel(password)
+}else{
+  loadingEnd()
+
+                Swal.fire({
+                icon: 'info',
+                title: 'ยังไม่ได้ป้อน Password...',
+                text: 'Something went wrong!',
+                footer: '<a href="https://mail.google.com/mail/u/0/?hl=en#inbox?compose=new">ติดต่อ Admin </a>'
+              })
+}
+
+}
+
+
+ function openModalFormAddEvents(){
+      
+      $("#openModalBTN").click()
+
+
+}
+
+function openModalFormAddEventsManual(){
+  
+  $("#openModalBTN").click()
+    var date = calendar.getDate().toISOString().split('T')[0]
+    console.log(calendar.getDate())
+      $("#sdate").val(date)
+      $("#edate").val(date)
+  loadingEnd()
+
+  // alert("The current date of the calendar is " + date.toISOString());
+  
+}
+
+/** ตรวจสอบประเภทอีเวนท์จาก Dom option Select และ ดึงค่าสี จาก property color **/
+var selection = document.getElementById("inputState");
+let colorSet = ""
+selection.onchange = function(event){
+    colorSet = event.target.options[event.target.selectedIndex].dataset.color;
+  console.log("test: " + colorSet);
+};
+
+
+/** Sibmit form add Event **/
+const addData = (e)=>{
+event.preventDefault()
+
+let formE = document.querySelector('form')
+  if (!formE.checkValidity()) {
+      Swal.fire({
+        position: 'center',
+        icon: 'error',
+        title: 'ตรวจสอบการกรอกข้อมูลให้ถูกต้องก่อนบันทึก',
+        showConfirmButton: false,
+        timer: 1500
+      })
+
+    return console.log("a")
+  }
+
+const sdated = e.sdate.value
+const edate = e.edate.value
+const stime = e.stime.value
+const etime = e.etime.value 
+const titleE = e.titleE.value
+const typeE = e.inputState.value
+const idE = "ID"+new Date().getTime()
+
+let gridCheck = document.getElementsByName('alldayChk');
+    let addDayChk = "" 
+    for(var i = 0; i < gridCheck.length; i++){
+        if(gridCheck[i].checked){
+            gridCheck_value = gridCheck[i].value;
+            addDayChk = gridCheck_value
+        }else {
+          addDayChk = false
+        }
+    }
+        const dateCheckStart = new Date(sdated)
+        const dateCheckEnd = new Date(edate)
+        console.log(dateCheckEnd)
+        const timecheckDif = dateCheckEnd.getTime() - dateCheckStart.getTime()
+        const dayCheckDif = Math.ceil(timecheckDif / (1000 * 60 * 60 * 24)) // หารด้วย 86400000
+        console.log("s",dayCheckDif)
+        if(dayCheckDif > 0){
+          addDayChk = false
+        }
+
+// console.log(addDayChk)
+if (!isNaN(sdated.valueOf())) { 
+  alert("Not Found Date")
+}else{
+calendar.addEvent({
+              id: idE,
+              title: titleE,
+              start: sdated+" "+stime+":00",
+              allDay : addDayChk,
+              color : colorSet,
+              end : edate+" "+etime+":00",
+              url: ""
+
+
+            });   
+  // console.log(sdated,addDayChk,sdated+stime+":00")
+
+  let objToSheet = {}
+      objToSheet.idC = idE
+      objToSheet.sdate = sdated
+      objToSheet.edate = edate 
+      objToSheet.stime = stime
+      objToSheet.etime = etime
+      objToSheet.titleE = titleE
+      objToSheet.typeE = typeE
+      objToSheet.addDayChk = addDayChk
+
+
+    google.script.run.withSuccessHandler((dataprevAdd)=>{
+loadingStart()
+
+      let dataResOBJ = JSON.parse(dataprevAdd)
+      mainCreateTable(dataResOBJ)
+      showStatistic()
+
+
+    }).addEventToSheets(objToSheet)
+}
+    formE.reset()
+    formE.classList.remove('was-validated');
+    $('#clmodal').click();
+loadingEnd()
+
+}
+
+let table			
+function showTable(array){
+     document.getElementById("showload").innerHTML = "Please wait Starting CreateDatatable..."
+     document.getElementById("showload").classList.add('text-success')
+
+    $(document).ready(function () {
+
+        table	 =  $('#example').DataTable({
+            data: array,
+            columns: [
+                { title: 'ID'},     
+                { title: 'Title' },                
+                { title: 'Date-start' 
+                // render: function (data, type, row) {
+                // return `<div class="row text-center">
+                // <span class="fw-bold text-success" style="font-size:10px">${data}</span>
+                // </div>
+                // <div class="row text-center">
+                // <span class="text-primary" style="font-size:12px">${row[3]}</span>
+                // </div>`
+                // }                  
+                },
+                { title: 'Date-end' },
+                { title: 'color' ,
+                render: function (data, type, row) {
+                    return `<div class="row">
+                    <span class="fs-6 fw-bold" style="color:${data}">${data}</span>
+                    </div>`
+                }     
+                },
+                { title: 'AllDay' ,
+                render: function (data, type, row) {
+                    return `<div class="row">
+                    <span class="fs-6 fw-bold" style="color:${data}">${data}</span>
+                    </div>`
+                }     
+                },                           
+                { title: 'Delete' },      
+            ],
+
+  rowCallback: function(row, data, index,type){
+      // console.log(moment(data[2]).format('DD/MM/YYYY, h:mm:ss a'))
+
+      let dateFrom = new Date(data[2]).toLocaleDateString("th-TH")
+      let dateTo = new Date(data[3]).toLocaleDateString("th-TH")
+      let dateCheck = new Date().toLocaleDateString("th-TH")
+      // console.log(dateFrom,dateTo,dateCheck)
+
+      let d1 = dateFrom.split("/");
+      let d2 = dateTo.split("/");
+      let c = dateCheck.split("/");
+
+      let from = new Date(d1[2], parseInt(d1[1])-1, d1[0]);  // -1 because months are from 0 to 11
+      let to   = new Date(d2[2], parseInt(d2[1])-1, d2[0]);
+      let check = new Date(c[2], parseInt(c[1])-1, c[0]);
+
+      const checkDateBetween = check > from && check < to || from === check
+      if(checkDateBetween == true){
+        $(row).find('td:eq(0)').html(`<span class="text-danger" style="font-size:.75rem" ><i class="fa-solid fa-circle-check"></i> ${data[1]} </span>`);
+        $(row).find('td:eq(1)').html(`<span class="text-danger" style="font-size:.75rem" ><i class="fa-solid fa-circle-check"></i> ${data[2]} </span>`);
+      }
+
+        const dateToday = new Date()
+        const dateAct = new Date(data[2])
+        const timeDif = dateAct.getTime() - dateToday.getTime()
+        const dayDif = Math.ceil(timeDif / (1000 * 60 * 60 * 24))
+        // console.log(dayDif)
+      if(dayDif === 0 || dayDif === -0){
+        $(row).find('td:eq(1)').html(`<span class="text-danger" style="font-size:.75rem" ><i class="fa-solid fa-circle-check"></i> ${data[2]} </span>`);
+        $(row).find('td:eq(0)').html(`<span class="text-danger" style="font-size:.75rem" ><i class="fa-solid fa-circle-check"></i> ${data[1]} </span>`);
+
+      }        
+
+  },          
+
+
+            lengthMenu: [ 5, 10, 25, 50, 75, 100 ],
+            pageLength: 5,
+                
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/th.json',
+                },
+
+                responsive: {
+                    details: {
+                        display: $.fn.dataTable.Responsive.display.modal( {
+                            header: function ( row ) {
+                                var data = row.data();
+                                return 'กิจกรรมวันนี้ '+data[0]+' '+data[1];
+                            }
+                        } ),
+                        renderer: $.fn.dataTable.Responsive.renderer.tableAll()
+                    }
+                },
+
+        columnDefs: [
+            { className: "titleEv", "targets": [ 1 ] },
+            { className: "dateStart", "targets": [ 2 ] },
+            {
+            targets: [0,3,4,5],
+            visible: false,
+            searchable: true,
+            },
+            {
+                targets: -1,
+                data: null,
+                defaultContent: '<button class="del btn btn-light text-danger btn-sm"><i class="fa-solid fa-delete-left"></i></button> <button type="button" class="goto btn btn-light text-info"><i class="fa-solid fa-truck-fast"></i></button>',
+            },    
+            { 
+            targets: [2],
+            type: 'date',     
+            // render: function (data, type, row) {
+
+            // return moment(data).format('DD/MM/YYYY, h:mm:ss a');
+
+            // }                  
+            },    
+        ],
+        order: [[ 2, "asc" ]],                    
+        destroy: true,
+      });
+
+  /** ***********************     เริ่มการทำงาน button delete event  *********************** */ 
+
+      $('#example tbody').on('click', 'button.del', async function () {
+        const dataT = table.row($(this).parents('tr')).data();
+        const idEvent = dataT[0]
+
+      const { value: password } = await Swal.fire({
+        title: 'Enter your password',
+        input: 'password',
+        inputLabel: 'Password',
+        inputPlaceholder: 'Enter your password',
+        inputAttributes: {
+          maxlength: 10,
+          autocapitalize: 'off',
+          autocorrect: 'off'
+        }
+      })
+
+  //ตรวจสอบค่าว่าง password 
+      if (password) {
+loadingStart()
+
+// document.getElementById("showload").innerHTML = "Please wait Checking Your Password..."
+  //ตรวจสอบ password จาก sheet ว่าเป็นจริงหรือไม่ //
+          google.script.run.withSuccessHandler((chkRes)=>{
+            // console.log("xx>  "+chkRes)  
+  //ผลการตรวจสอบเป็นจริง ให้แสดงคำเตือนก่อนการลบ
+            if(chkRes == true){
+             Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+              }).then((result) => {
+                if (result.isConfirmed) {
+                     calendar.getEventById(idEvent).remove()  
+                    // let y = calendar.getEvents()
+                    // console.log(y)
+
+  // ส่งค่า key idEvent จาก Client ไป เทียบเพื่อลบค่าในตาราง 
+                  google.script.run.withSuccessHandler((dataprevDel)=>{
+                      let dataOBJ = JSON.parse(dataprevDel)
+                      mainCreateTable(dataOBJ)
+                      showStatistic()
+                      loadingEnd()            
+                      Swal.fire(
+                        'Deleted!',
+                        'Your file has been deleted.',
+                        'success'
+                      )
+                  }).deleteRowSheet(idEvent)
+                }
+              })
+            }else{
+              Swal.fire({
+                icon: 'error',
+                title: 'รหัสผิด...',
+                text: 'Something went wrong!',
+                footer: '<a href="https://mail.google.com/mail/u/0/?hl=en#inbox?compose=new">ติดต่อ Admin </a>'
+              })
+            }
+            document.getElementById("showload").innerHTML = "Please wait Loading Events From Sheet..."
+            loadingEnd()            
+          }).checkPasswordOnDel(password)
+
+      }else{
+        Swal.fire({
+        icon: 'info',
+        title: 'ยังไม่ได้ป้อน Password...',
+        text: 'Something went wrong!',
+        footer: '<a href="https://mail.google.com/mail/u/0/?hl=en#inbox?compose=new">ติดต่อ Admin </a>'
+      })
+      }
+    
+    });
+
+  /** ***********************     เริ่มการทำงาน button goto date  *********************** */ 
+      $('#example tbody').on('click', 'button.goto', async function () {
+        const dataT = table.row($(this).parents('tr')).data();
+        calendar.gotoDate(dataT[2])
+        $('.fc-day[data-date="' + dataT[2].split(" ")[0] + '"]').css('background-color','#ffc8dd')
+        setTimeout(()=>{
+            $('.fc-day[data-date="' + dataT[2].split(" ")[0] + '"]').css('background-color','')
+        },1200)
+        
+        const idEvent = dataT[0]
+    });
+
+}); //End document ready
+}
+
+
+
+// Example starter JavaScript for disabling form submissions if there are invalid fields
+(() => {
+  'use strict'
+  const forms = document.querySelectorAll('.needs-validation')
+
+  // Loop over them and prevent submission
+  Array.from(forms).forEach(form => {
+    form.addEventListener('submit', event => {
+      if (!form.checkValidity()) {
+        event.preventDefault()
+        event.stopPropagation()
+      }
+
+      form.classList.add('was-validated')
+    }, false)
+  })
+})()
+
+/** สั่งพิมพ์ พรีวิวก่อน */
+ function printlist() {
+    event.preventDefault()
+    window.print()
+}
+
+function loadingStart(){
+    document.getElementById("loading").classList.remove('invisible');     
+}
+
+function loadingEnd(){
+    document.getElementById("loading").classList.add('invisible');    
+}
+
+</script>
+
